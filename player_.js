@@ -1,4 +1,4 @@
-import gestionnaire from './HistorySystem.js'
+import gestionnaire from './HistoryProxyManager.jsger.js'
 
 class Smanager {
     constructor(){
@@ -40,114 +40,82 @@ class Smanager {
         tracks.forEach(track => {
             if(track.src){
                 track.volume = 5
-                track.color  = 'white'
                 track.blob   = null
             }
         });
     }
 
+    /**
+     * 
+     * @param {string} name 
+     * @returns this.tracks[x => x.name = name]
+     */
     getTrack(name){ if(name) return this.tracks.filter(track => track.name == name) }
 
+    /**
+     * 
+     * @returns this.tracks
+     */
     getTracks(){ return this.tracks }
 
     test(data = 'test'){ this.teste = data }
 
 
 
+    // History method's implementation ------------------------------
 
     /**
      * @summary Boocle on reversed array history item copy
-     *              If item.active 
-     *                  Set lastvalue of modification on data Class
+     *           If item.active 
+     *             Set lastvalue of modification on data Class
+     * 
+     *  @param {integer} goto go to position in the list of history items
      */
-    historyBackward(){ 
-        [...this.history.items].reverse().every(item => {
-            if(item.active){
-                this.historySetItem(item.prop, item.last_value, false)
-                return false
-            }
-        })
-    }
-
-
-    /**
-     * @summary Browse history.items until find item.id = itemid
-     *          If item.id = itemid also change class property with last_value of historique item
-     *          Else change class property with last_value of historique item and update item as false
-     * @param {integer} itemid 
-     */
-    historyBackTo(itemid){
-        if(!isNaN(itemid)){
+    historyBackward(position = 1){ 
+        let tour = 0;
             [...this.history.items].reverse().forEach(item => {
-                if(item.id === itemid){
-                    this.historySetItem(item.prop, item.last_value, false)
-                    return 
-                }else{
-                    this.historySetItem(item.prop, item.last_value, false)
-                    this.historyUpdateItemState(item.id, 'active', false)
+                if(tour < position){
+                    if(item.active){
+                        this.historySetItem(item.prop, item.last_value, item.id, false)
+                        tour += 1;
+                    }
                 }
             })
-        }
     }
-
-    historyGoTo(itemid){
-        if(!isNaN(itemid)){
-            [...this.history.items].reverse().forEach(item => {
-                if(item.id === itemid){
-                    this.historySetItem(item.prop, item.last_value, false)
-                    return 
-                }else{
-                    this.historySetItem(item.prop, item.last_value, false)
-                    this.historyUpdateItemState(item.id, 'active', false)
-                }
-            })
-        }
-    }
-
-
 
     /**
      * @summary Boocle on reversed array history item copy
-     *              If item.active = false
-     *                  Set newvalue of modification on data Class
+     *            If item.active = false
+     *             Set newvalue of modification on data Class
+     * 
+     * @param {integer} goto go to position in the list of history items
      */
-    historyForward(){
-        [...this.history.items].reverse().every(item => {
-            if(item.active == false){
-                this.historySetItem(item.prop, item.new_value, true)
-                return
+    historyForward(goto = 1){
+        let tour = 0
+        this.history.items.forEach(item => {
+            if(tour < goto){
+                if(item.active == false){
+                    tour += 1
+                    this.historySetItem(item.prop, item.new_value, item.id, true)
+                }
             }
         })
     }
 
     /**
      * @summary Set an class data an remove its action in history.items
-     * @param {string} item_name 
-     * @param {any}    value 
+     * @param {string} prop         class property
+     * @param {any}    value        value for the class property
+     * @param {any}    hitemid      history item id
+     * @param {any}    hitem_value  history item value for active property
      */
-    historySetItem(item_name, value, active){
-        this[item_name] = value
+    historySetItem(prop, value, hitemid, hitem_value){
+        this[prop] = value
         this.history.items.pop()
-        this.history.items.at(-1).active = active
-    }
-
-
-    /**
-     * @summury Boocle on history.items
-     *              If item.id = id
-     *                  set history item property with value
-     * @param {integer} id 
-     * @param {string}  prop 
-     * @param {any}     value 
-     */
-    historyUpdateItemState(id, prop, value){
         this.history.items.forEach((item, index) => {
-            if(item.id == id) {
-                this.history.items[index][prop] = value
-            }
+            if(item.id === hitemid) this.history.items[index].active = hitem_value
         })
     }
-
 }
 
 export const smanager = new Proxy(new Smanager(), gestionnaire);
