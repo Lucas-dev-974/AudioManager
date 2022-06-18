@@ -14,6 +14,7 @@ const gestionnaire = {
 
     /**
      * @summary When set property of object "obj" do next code
+     *          hitem param is "history item"
      * @param {any} obj 
      * @param {string} prop 
      * @param {any} valeur 
