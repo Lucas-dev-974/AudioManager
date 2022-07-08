@@ -7,9 +7,13 @@ const gestionnaire = {
      * @returns 
      */
     get(cible, prop, recepteur) {
-        recepteur
-        cible.history.last_called_method = prop
-        return Reflect.get(...arguments);
+        if(typeof(cible[prop]) == 'function' && prop !== 'pushWaitEvents' && prop !== 'setOutOfHistoryItems')
+            cible.history.last_called_method = prop
+        if(prop == 'initPlayer'  || cible.ac != null)
+            return Reflect.get(...arguments);
+        else{
+            return Reflect.get(...arguments)
+        }
     },
 
     /**
@@ -23,7 +27,7 @@ const gestionnaire = {
     set(obj, prop, valeur){
         // console.log('--------', obj);
         const hitem = {
-            id: obj.history.items.length + 1,
+            id:   obj.history.items.length + 1,
             date: Date.now(),
             prop: prop,
             last_value: obj[prop],
